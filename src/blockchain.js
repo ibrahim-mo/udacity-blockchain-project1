@@ -11,7 +11,7 @@
 const SHA256 = require('crypto-js/sha256');
 const BlockClass = require('./block.js');
 const bitcoinMessage = require('bitcoinjs-message');
-const hex2ascii = require('hex2ascii')
+const hex2ascii = require('hex2ascii');
 
 class Blockchain {
 
@@ -72,10 +72,14 @@ class Blockchain {
                     block.previousBlockHash = self.chain[self.chain.length-1].hash
                 }
                 block.hash = SHA256(JSON.stringify(block)).toString();
-
                 self.chain.push(block);
-                resolve(block);
 
+                let errorLog = await self.validateChain();
+                if (errorLog.length == 0) {
+                    resolve(block)
+                } else {
+                    reject(Error(JSON.stringify({'Errors': errorLog})))
+                }
             } catch (error) {
                 reject(error)
             }
